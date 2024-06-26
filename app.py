@@ -108,6 +108,26 @@ def handle_start_conversation(data):
 
     threading.Thread(target=run_conversation, args=(agents, topic)).start()
 
+def run_conversation(agents, initial_message, num_turns=8):
+    message = initial_message
+    last_agent = None
+    # added a print to ensure the topic is being passed correctly
+    print("Running conversation on topic: " + message)
+    for _ in range(num_turns):
+        available_agents = [agent for agent in agents if agent != last_agent]
+        agent = random.choice(available_agents)
+        response = agent.respond(message)
+        socketio.emit('new_message', {'role': agent.name, 'content': response})
+        message = response
+        last_agent = agent
+        time.sleep(1)
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True)
+
+
+# Feature commented out, as it is not used in the current version of the app - it kind of works, but the bots ignore the topic and only
+# respond to the last message sent by another bot. 
 # @socketio.on('next_message')
 # def handle_next_message(data):
 #     message = data['message']
@@ -121,19 +141,3 @@ def handle_start_conversation(data):
 #         agent.history.append({"role": "user", "content": message})
 
 #     threading.Thread(target=run_conversation, args=(agents, message)).start()
-
-def run_conversation(agents, initial_message, num_turns=8):
-    message = initial_message
-    last_agent = None
-    print("Running conversation on topic: " + message)
-    for _ in range(num_turns):
-        available_agents = [agent for agent in agents if agent != last_agent]
-        agent = random.choice(available_agents)
-        response = agent.respond(message)
-        socketio.emit('new_message', {'role': agent.name, 'content': response})
-        message = response
-        last_agent = agent
-        time.sleep(1)
-
-if __name__ == '__main__':
-    socketio.run(app, debug=True)

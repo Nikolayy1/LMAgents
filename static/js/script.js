@@ -4,15 +4,12 @@ let currentMessageContent = null;
 let currentRole = null;
 
 socket.on('new_message', function (msg) {
+    // If it's a system message, create a notification on top, else create a message
     if (msg.role === 'system') {
         createSystemMessage(msg.content);
-        if (msg.content === 'Conversation ended') {
-            currentMessageContainer = null;
-            currentMessageContent = null;
-            currentRole = null;
-        }
     }
     else {
+        // If the role is different from the current role, create a new message container
         if (currentRole !== msg.role || !currentMessageContainer) {
             currentMessageContainer = createChatStructure(msg.role, msg.content);
             currentRole = msg.role;
@@ -26,6 +23,7 @@ socket.on('new_message', function (msg) {
     }
 });
 
+// function to start a conversation, sets topic to the input value
 function startConversation() {
     document.getElementById('chat').innerHTML = '';
     let input = document.getElementById('topic_input');
@@ -34,6 +32,7 @@ function startConversation() {
     input.value = '';
 }
 
+// Function to send the next message. This is not used in the current implementation but would work. Instead of sending 8 messages at once, we could send one at a time.
 // function nextMessage() {
 //     let input = document.getElementById('topic_input');
 //     let topic = currentMessageContent.innerHTML;
@@ -42,6 +41,8 @@ function startConversation() {
 //     input.value = '';
 // }
 
+
+// Function to create the chat container for each message - gets name and content as input
 function createChatStructure(name, content) {
     let chat = document.getElementById('chat');
 
@@ -100,12 +101,14 @@ function createChatStructure(name, content) {
     return messageContainer;
 }
 
+// Function to append a message to the current container
 function appendMessageToCurrentContainer(content) {
     if (currentMessageContent) {
         currentMessageContent.textContent = content;
     }
 }
 
+// Function to create a system message
 function createSystemMessage(content) {
     let chat = document.getElementById('chat');
 
