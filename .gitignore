@@ -1,3 +1,5 @@
 LMAgents/
 *.csv
 .DS_Store
+Lib/
+Scripts/

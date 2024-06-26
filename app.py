@@ -7,13 +7,12 @@ import threading
 import time
 import random
 import json
-import csv  # Import the CSV module
+import csv
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Global token limit
 TOKEN_LIMIT = 2048
 
 class LMStudioAgent:
@@ -35,7 +34,6 @@ class LMStudioAgent:
     def respond(self, message):
         self.history.append({"role": "user", "content": message})
         
-        # Calculate the number of tokens to include in the context
         context_tokens = int(TOKEN_LIMIT * 0.5)
         context = self._get_context(context_tokens)
         
@@ -54,20 +52,14 @@ class LMStudioAgent:
 
         self.history.append(new_message)
         
-        # Save the final message to a CSV file
-        # try to save the message to a csv file, in case it fails, it will not break the code
         try:
             self.save_message_to_csv(new_message["content"])
-        except:
-            # if saving still fails, print an error message
-            print("Error saving message to CSV")
-            # skip the line and continue
-            pass
+        except Exception as e:
+            print(f"Error saving message to CSV: {e}")
         
         return new_message["content"]
 
     def _get_context(self, context_tokens):
-        # Create a context with the last `context_tokens` tokens
         context = []
         total_tokens = 0
         for message in reversed(self.history):
@@ -116,10 +108,24 @@ def handle_start_conversation(data):
 
     threading.Thread(target=run_conversation, args=(agents, topic)).start()
 
-def run_conversation(agents, initial_message, num_turns=15):
+# @socketio.on('next_message')
+# def handle_next_message(data):
+#     message = data['message']
+#     print("Received next_message with topic:", message)  # Log the received topic
+
+#     if not message:
+#         print("No topic provided for next_message")
+#         return
+
+#     for agent in agents:
+#         agent.history.append({"role": "user", "content": message})
+
+#     threading.Thread(target=run_conversation, args=(agents, message)).start()
+
+def run_conversation(agents, initial_message, num_turns=8):
     message = initial_message
     last_agent = None
-    
+    print("Running conversation on topic: " + message)
     for _ in range(num_turns):
         available_agents = [agent for agent in agents if agent != last_agent]
         agent = random.choice(available_agents)
@@ -127,7 +133,7 @@ def run_conversation(agents, initial_message, num_turns=15):
         socketio.emit('new_message', {'role': agent.name, 'content': response})
         message = response
         last_agent = agent
-        time.sleep(1)  # Add a delay between messages
+        time.sleep(1)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

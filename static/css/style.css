@@ -1,0 +1,30 @@
+#chat{
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.messageImg{
+  width: 4vw;
+  height: auto;
+}
+
+.messageRow{
+  display: flex;
+  flex-direction: row;
+  margin: 1vh;
+}
+
+.cardImg{
+  width: 4vw !important;
+  height: auto;
+}
+
+body{
+  background-image: url('../images/whatsapp.png');
+}
+
+.customContainer{
+  height: 80vh;
+}
